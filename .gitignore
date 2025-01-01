@@ -22,10 +22,10 @@
 roadmap.txt
 
 # backend path
-backend/.env
-backend/src/vendor
+.backend/.env
+.backend/src/vendor
 
 # frontend path
-frontend/.env
-frontend/node_modules
+.frontend/.env
+.frontend/node_modules
 
