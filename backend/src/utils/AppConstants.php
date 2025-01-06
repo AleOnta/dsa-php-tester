@@ -5,8 +5,11 @@ namespace Backend\Utils;
 class AppConstants
 {
     # define the root path of the application
-    public const ROOT_DIR = dirname(dirname(__DIR__));
+    public const ROOT_DIR = __DIR__ . "/../../";
+
+    # define child paths
     public const ENV_PATH = self::ROOT_DIR . ".env";
-    public const CONFIG_DIR = self::ROOT_DIR . "config/";
     public const UTILS_DIR = self::ROOT_DIR . "src/utils/";
+    public const CONFIG_DIR = self::ROOT_DIR . "config/";
+    public const ROUTES_DIR = self::ROOT_DIR . "src/routes/";
 }
