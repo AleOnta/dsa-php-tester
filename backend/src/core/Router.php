@@ -6,9 +6,15 @@ use Backend\Controllers\RootController;
 
 class Router
 {
-    protected array $routes = [];
-    protected Route $defaultRoute;
     protected Container $c;
+    public array $routes = [];
+    protected Route $defaultRoute;
+    protected string $groupPrefix = '';
+
+    public function __construct(Container $container)
+    {
+        $this->c = $container;
+    }
 
     public function addRoute(string $uri, string $method, string $controller, string $action, array $middlewareStack)
     {
@@ -16,6 +22,15 @@ class Router
         $this->routes[$method][] = $route;
         # allow chaining 
         return $route;
+    }
+
+    # create a group of routes under the same prefix
+    public function group(string $prefix, callable $callback)
+    {
+        $previousPrefix = $this->groupPrefix;
+        $this->groupPrefix = $prefix;
+        $callback($this);
+        $this->groupPrefix = $previousPrefix;
     }
 
     public function get(string $uri, string $controller, string $action, array $middlewareStack)
@@ -54,8 +69,38 @@ class Router
             # check for route pattern
             if ($route->matches($uri)) {
                 # extract parameters
-                $route->extractParameters($uri);
+                $params = $route->extractParameters($uri);
+                # retrieve controller and action from the container
+                $controller = $this->c->get($route->controller);
+                $action = $route->action;
+                echo "<pre>";
+                print_r($this->c);
+                echo "</pre>";
+                die();
+                if (method_exists($controller, $action)) {
+                    # execute requested method 
+                    $controller->$action;
+                } else {
+                    # handle undefined request
+                    $this->handle404($uri, $route->controller, $route->action);
+                }
             }
         }
+    }
+
+    private function handle404(string $uri, string $controller, string $action)
+    {
+        http_response_code(404);
+        $response = [
+            'code' => 404,
+            'status' => 'not found',
+            'payload' => [
+                'uri' => $uri,
+                'controller' => $controller,
+                'action' => $action
+            ]
+        ];
+        echo json_encode($response);
+        die();
     }
 }

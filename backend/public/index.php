@@ -1,9 +1,6 @@
 <?php
 
-include dirname(__DIR__) . "/vendor/autoload.php";
-include_once dirname(__DIR__) . "/src/utils/helpers.php";
+require_once dirname(__DIR__) . '/config/bootstrap.php';
 
-use Backend\Core\Request;
-use Backend\Utils\AppConstants;
 
-require AppConstants::ROUTES_DIR . 'index.php';
+require \Backend\Utils\AppConstants::ROUTES_DIR . 'index.php';
