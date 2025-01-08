@@ -73,13 +73,9 @@ class Router
                 # retrieve controller and action from the container
                 $controller = $this->c->get($route->controller);
                 $action = $route->action;
-                echo "<pre>";
-                print_r($this->c);
-                echo "</pre>";
-                die();
                 if (method_exists($controller, $action)) {
                     # execute requested method 
-                    $controller->$action;
+                    $controller->$action();
                 } else {
                     # handle undefined request
                     $this->handle404($uri, $route->controller, $route->action);

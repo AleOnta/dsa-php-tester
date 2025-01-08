@@ -11,4 +11,6 @@ require_once AppConstants::UTILS_DIR . "helpers.php";
 $container = new \Backend\Core\Container;
 
 # registering controllers
-$container->set(RootController::class, fn() => new RootController());
+$container->set(RootController::class, function() {
+    return new RootController();
+});

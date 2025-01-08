@@ -19,6 +19,7 @@ class Container
             throw new \Exception("Service [{$serviceKey}] doesn't exists!");
         }
         # return the required service
-        return $this->services[$serviceKey];
+        $service = $this->services[$serviceKey];
+        return $service($this);
     }
 }
