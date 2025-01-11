@@ -2,7 +2,6 @@
 
 use Backend\Core\Router;
 use Backend\Controllers\RootController;
-use Backend\Middlewares\TestMiddleware;
 
 $router = new Router($container);
 
@@ -10,8 +9,8 @@ $router = new Router($container);
 $router->get('/', RootController::class, 'index', []);
 
 $router->group('/api/v1', function ($router) {
-    $router->get('/users/{id}', RootController::class, 'index', [TestMiddleware::class])->where(['id' => 'int']);
-    $router->get('/users/{name}', RootController::class, 'index', [TestMiddleware::class])->where(['name' => 'string']);
+    $router->get('/users/{id}', RootController::class, 'index', [])->where(['id' => 'int']);
+    $router->get('/users/{name}', RootController::class, 'index', [])->where(['name' => 'string']);
 });
 
 $router->dispatch();
