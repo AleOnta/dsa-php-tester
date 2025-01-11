@@ -26,6 +26,7 @@ backend/.env
 backend/vendor
 backend/composer.json
 backend/composer.lock
+backend/src/devtester.php
 
 # frontend path
 frontend/.env
