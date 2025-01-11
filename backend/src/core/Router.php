@@ -3,6 +3,7 @@
 namespace Backend\Core;
 
 use Backend\Controllers\RootController;
+use Closure;
 
 class Router
 {
@@ -74,14 +75,42 @@ class Router
                 $controller = $this->c->get($route->controller);
                 $action = $route->action;
                 if (method_exists($controller, $action)) {
-                    # execute requested method 
-                    $controller->$action();
+                    # execute middlewares
+                    $this->executeMiddlewares($route->middlewares, function () use ($controller, $action, $params) {
+                        # execute requested method 
+                        call_user_func_array([$controller, $action], $params);
+                    });
                 } else {
                     # handle undefined request
                     $this->handle404($uri, $route->controller, $route->action);
                 }
             }
         }
+    }
+
+    private function executeMiddlewares(array $middlewareStack, Closure $next) :void {
+        # check if there are middlewares to execute
+        if (count($middlewareStack) === 0) {
+            # no middlewares - proceed with request
+            $next();
+            return;
+        }
+
+        # get the first middleware in the stack
+        $middlewareInfo = array_shift($middlewareStack);
+        # create and instance of the middleware class
+        if (is_array($middlewareInfo)) {
+            [$middlewareClass, $args] = $middlewareInfo;
+            $middleware = new $middlewareClass(...$args);
+        } else {
+            $middlewareClass = $middlewareInfo;
+            $middleware = new $middlewareClass();
+        }
+
+        # execute the middlewares until the middleware stack is empty
+        $middleware->handle($_SERVER, function() use ($middlewareStack, $next) {
+            $this->executeMiddlewares($middlewareStack, $next);
+        });
     }
 
     private function handle404(string $uri, string $controller, string $action)
