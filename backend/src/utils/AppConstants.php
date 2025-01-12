@@ -12,4 +12,5 @@ class AppConstants
     public const UTILS_DIR = self::ROOT_DIR . "src/utils/";
     public const CONFIG_DIR = self::ROOT_DIR . "config/";
     public const ROUTES_DIR = self::ROOT_DIR . "src/routes/";
+    public const MIGRATIONS_DIR = self::ROOT_DIR . "src/database/migrations/";
 }
