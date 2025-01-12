@@ -19,7 +19,11 @@ class Router
 
     public function addRoute(string $uri, string $method, string $controller, string $action, array $middlewareStack)
     {
+        # add prefix if present
+        $uri = $this->groupPrefix.$uri;
+        # create the route object
         $route = new Route($uri, $method, $controller, $action, $middlewareStack);
+        # store the route in the router
         $this->routes[$method][] = $route;
         # allow chaining 
         return $route;
@@ -86,6 +90,8 @@ class Router
                 }
             }
         }
+        # handle undefined request
+        dd($this->routes);
     }
 
     private function executeMiddlewares(array $middlewareStack, Closure $next) :void {
