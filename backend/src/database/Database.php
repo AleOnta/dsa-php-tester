@@ -40,15 +40,15 @@ class Database {
 
     public static function setCharsetEncoding(): void {
 
+        # check for existing db connection
         if (!empty(self::$instance)) {
             self::getInstance();
         }
 
+        # set client encoding
         self::$instance->exec(
-            "
-            SET NAMES 'UTF8';
-            SET client_encoding  = 'UTF8';
-            "
+            "SET NAMES 'UTF8';
+            SET client_encoding  = 'UTF8';"
         );
     }
 
