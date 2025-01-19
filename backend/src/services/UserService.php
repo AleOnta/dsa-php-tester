@@ -14,6 +14,19 @@ class UserService
         $this->userRepo = $userRepository;
     }
 
+    public function validateUsername(string $username)
+    {
+        # check if username is empty string
+        if (empty($username)) {
+            return [false, 'Username is required'];
+        }
+        # check if the username contains forbidden chars
+        if (!preg_match('/^[0-9a-zA-Z]{5,16}$/', $username)) {
+            return [false, 'Username is invalid (must be an alphanumeric string with no special characters and a length between 6-16 chars)'];
+        }
+        return $username;
+    }
+
     # method that validate a user email during registration
     public function validateEmail(string $email)
     {
@@ -25,13 +38,14 @@ class UserService
         }
         # validate basic email format
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return [false, 'Provide a valid email password'];
+            return [false, 'Provide a valid email password [Bad email format]'];
         }
         # validate MX
-        if (checkdnsrr(explode('@', $email)[1])) {
-            return [false, 'Email domain does not exists'];
+        $domain = explode('@', $email)[1];
+        if (!checkdnsrr($domain, 'MX')) {
+            return [false, "MX DNS record for domain ({$domain}) does not exists"];
         }
-        return true;
+        return $email;
     }
 
     # method that validate a user password during registration
@@ -52,8 +66,8 @@ class UserService
         # 1 number
         # 1 special char
         if (!preg_match("/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{10,}$/", $password)) {
-            $message = 'Password is invalid' . PHP_EOL;
-            $message .= 'rules: min 10 chars, min 1 uppercase, min 1 lowercase, min 1 number, min 1 special char.';
+            $message = 'Password is invalid,';
+            $message .= ' rules: min 10 chars, min 1 uppercase, min 1 lowercase, min 1 number, min 1 special char.';
             return [false, $message];
         }
         return true;
