@@ -20,7 +20,7 @@ class Router
     public function addRoute(string $uri, string $method, string $controller, string $action, array $middlewareStack)
     {
         # add prefix if present
-        $uri = $this->groupPrefix.$uri;
+        $uri = $this->groupPrefix . $uri;
         # create the route object
         $route = new Route($uri, $method, $controller, $action, $middlewareStack);
         # store the route in the router
@@ -82,7 +82,7 @@ class Router
                     # execute middlewares
                     $this->executeMiddlewares($route->middlewares, function () use ($controller, $action, $params) {
                         # execute requested method 
-                        call_user_func_array([$controller, $action], $params);
+                        call_user_func_array([$controller, $action], array_values($params));
                     });
                 } else {
                     # handle undefined request
@@ -94,7 +94,8 @@ class Router
         dd($this->routes);
     }
 
-    private function executeMiddlewares(array $middlewareStack, Closure $next) :void {
+    private function executeMiddlewares(array $middlewareStack, Closure $next): void
+    {
         # check if there are middlewares to execute
         if (count($middlewareStack) === 0) {
             # no middlewares - proceed with request
@@ -114,7 +115,7 @@ class Router
         }
 
         # execute the middlewares until the middleware stack is empty
-        $middleware->handle($_SERVER, function() use ($middlewareStack, $next) {
+        $middleware->handle($_SERVER, function () use ($middlewareStack, $next) {
             $this->executeMiddlewares($middlewareStack, $next);
         });
     }
