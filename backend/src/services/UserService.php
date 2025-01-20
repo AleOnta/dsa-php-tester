@@ -82,4 +82,12 @@ class UserService
     {
         return $this->userRepo->existsByUsername($username);
     }
+
+    public function create(string $username, string $email, string $password): int
+    {
+        # hash the password
+        $hash = password_hash($password, PASSWORD_BCRYPT);
+        # create the user and return id
+        return $this->userRepo->createUser($username, $email, $hash);
+    }
 }
