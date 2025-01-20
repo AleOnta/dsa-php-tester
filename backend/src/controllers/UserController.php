@@ -52,9 +52,9 @@ class UserController extends Controller
         if (is_array($password)) {
             throw new \Backend\Exceptions\ValidationException('Password is invalid', ['password' => $password[1]]);
         }
-
-        http_response_code(200);
-        echo "OK";
-        die();
+        # create the user
+        $userId = $this->userService->create($username, $email, $password);
+        # return response
+        $this->response(202, ['status' => 'Ok', 'message' => 'User created correctly', 'id' => $userId]);
     }
 }
