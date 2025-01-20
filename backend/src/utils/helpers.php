@@ -14,7 +14,11 @@ function fatal_error_shutdown(): void
         echo json_encode([
             'error' => true,
             'message' => 'Something went wrong',
-            'last_error' => $lastError
+            'error' => [
+                'error_message' => $lastError['message'],
+                'file' => $lastError['file'],
+                'line' => $lastError['line']
+            ]
         ]);
         die();
     }

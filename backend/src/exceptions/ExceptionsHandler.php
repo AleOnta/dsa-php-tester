@@ -22,6 +22,7 @@ class ExceptionsHandler
     private function formatResponse(\Throwable $exception): array
     {
         return match (true) {
+            $exception instanceof \PDOException => $this->handleDatabaseException($exception),
             $exception instanceof \Backend\Exceptions\ValidationException => $this->handleValidationException($exception),
             $exception instanceof \Backend\Exceptions\MissingParameterException => $this->handleMissingParameterException($exception),
             $exception instanceof \Backend\Exceptions\InvalidRequestException => $this->handleInvalidRequestException($exception),
@@ -35,6 +36,17 @@ class ExceptionsHandler
             'status' => 500,
             'body' => [
                 'error' => true,
+                'message' => $exception->getMessage()
+            ]
+        ];
+    }
+
+    private function handleDatabaseException(\PDOException $exception)
+    {
+        return [
+            'status' => 500,
+            'body' => [
+                'error' => 'Database error',
                 'message' => $exception->getMessage()
             ]
         ];
