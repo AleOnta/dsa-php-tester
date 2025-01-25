@@ -83,6 +83,11 @@ class UserService
         return $this->userRepo->existsByUsername($username);
     }
 
+    public function getHashedPassword(int $user_id)
+    {
+        return $this->userRepo->getUserPassword($user_id);
+    }
+
     public function create(string $username, string $email, string $password): int
     {
         # hash the password
