@@ -55,6 +55,6 @@ class UserController extends Controller
         # create the user
         $userId = $this->userService->create($username, $email, $password);
         # return response
-        $this->response(202, ['status' => 'Ok', 'message' => 'User created correctly', 'id' => $userId]);
+        $this->response(202, ['status' => 'Ok', 'message' => 'User created correctly, authenticate to receive your api key', 'id' => $userId]);
     }
 }
