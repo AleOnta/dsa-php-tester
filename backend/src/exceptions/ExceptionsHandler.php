@@ -2,6 +2,7 @@
 
 namespace Backend\Exceptions;
 
+use Backend\Core\Route;
 use Exception;
 
 class ExceptionsHandler
@@ -22,6 +23,7 @@ class ExceptionsHandler
     private function formatResponse(\Throwable $exception): array
     {
         return match (true) {
+            $exception instanceof \Error => $this->handleErrors($exception),
             $exception instanceof \PDOException => $this->handleDatabaseException($exception),
             $exception instanceof \Backend\Exceptions\ValidationException => $this->handleValidationException($exception),
             $exception instanceof \Backend\Exceptions\MissingParameterException => $this->handleMissingParameterException($exception),
@@ -30,13 +32,26 @@ class ExceptionsHandler
         };
     }
 
+    private function handleErrors(\Error $error)
+    {
+        return [
+            'status' => 500,
+            'body' => [
+                'error' => true,
+                'message' => 'A critical error has occured.',
+                'details' => $error->getMessage()
+            ]
+        ];
+    }
+
     private function handleDefaultException(Exception $exception)
     {
         return [
             'status' => 500,
             'body' => [
                 'error' => true,
-                'message' => $exception->getMessage()
+                'message' => 'An unexpected exception occurred.',
+                'details' => $exception->getMessage()
             ]
         ];
     }
@@ -47,6 +62,7 @@ class ExceptionsHandler
             'status' => 500,
             'body' => [
                 'error' => 'Database error',
+                'message' => 'An unexpected database exception occurred.',
                 'message' => $exception->getMessage()
             ]
         ];
