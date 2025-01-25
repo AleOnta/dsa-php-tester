@@ -2,6 +2,8 @@
 
 namespace Backend\Repositories;
 
+use PDO;
+
 class UserRepository extends Repository
 {
 
@@ -55,7 +57,7 @@ class UserRepository extends Repository
         # execute the query
         $stmt->execute();
         # return the result
-        return $stmt->fetch(\PDO::FETCH_ASSOC) ?? false;
+        return $stmt->fetch(\PDO::FETCH_COLUMN) ?? false;
     }
 
     public function createUser(string $username, string $email, string $hash)
@@ -69,5 +71,17 @@ class UserRepository extends Repository
         if ($res) {
             return $this->db->lastInsertId();
         }
+    }
+
+    public function getUserPassword(int $user_id)
+    {
+        # prepare the query
+        $stmt = $this->db->prepare("SELECT password FROM {$this->table} WHERE id = :id");
+        # bind the user id param
+        $stmt->bindParam('id', $user_id, \PDO::PARAM_INT);
+        # execute the query
+        $stmt->execute();
+        # return data
+        return $stmt->fetch(PDO::FETCH_COLUMN) ?? false;
     }
 }
