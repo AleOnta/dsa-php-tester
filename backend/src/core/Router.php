@@ -34,7 +34,7 @@ class Router
     {
         $previousPrefix = $this->groupPrefix;
         $this->groupPrefix = $prefix;
-        $callback($this);
+        $callback($this, $this->c);
         $this->groupPrefix = $previousPrefix;
     }
 
@@ -91,7 +91,7 @@ class Router
             }
         }
         # handle undefined request
-        dd($this->routes);
+        dd("URI: {$uri} not found...");
     }
 
     private function executeMiddlewares(array $middlewareStack, Closure $next): void
@@ -102,7 +102,6 @@ class Router
             $next();
             return;
         }
-
         # get the first middleware in the stack
         $middlewareInfo = array_shift($middlewareStack);
         # create and instance of the middleware class
