@@ -2,7 +2,8 @@
 
 namespace Backend\Core;
 
-class Request {
+class Request
+{
 
     public array $headers;
     public string $method;
@@ -10,7 +11,7 @@ class Request {
     public array $queryParameters;
     public ?array $body;
 
-    public function __construct() 
+    public function __construct()
     {
         # extract all headers from HTTP req.
         $this->headers = getallheaders();
@@ -24,7 +25,7 @@ class Request {
         $this->parseRequestBody();
     }
 
-    private function parseRequestBody(): void 
+    private function parseRequestBody(): void
     {
         # set json as default content type
         $body = ['format' => 'json'];
@@ -57,4 +58,14 @@ class Request {
         $this->body = $body;
     }
 
+    public function getHeader($key)
+    {
+        return $this->headers[$key] ?? null;
+    }
+
+    public function getApiKey()
+    {
+        $apikey = $this->getHeader('Authorization');
+        return str_replace('Bearer ', '', $apikey);
+    }
 }
