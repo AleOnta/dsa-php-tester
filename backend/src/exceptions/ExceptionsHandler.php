@@ -2,7 +2,6 @@
 
 namespace Backend\Exceptions;
 
-use Backend\Core\Route;
 use Exception;
 
 class ExceptionsHandler
@@ -25,9 +24,12 @@ class ExceptionsHandler
         return match (true) {
             $exception instanceof \Error => $this->handleErrors($exception),
             $exception instanceof \PDOException => $this->handleDatabaseException($exception),
-            $exception instanceof \Backend\Exceptions\ValidationException => $this->handleValidationException($exception),
-            $exception instanceof \Backend\Exceptions\MissingParameterException => $this->handleMissingParameterException($exception),
-            $exception instanceof \Backend\Exceptions\InvalidRequestException => $this->handleInvalidRequestException($exception),
+            $exception instanceof ValidationException => $this->handleValidationException($exception),
+            $exception instanceof NotFoundException => $this->handleExceptionWithNoDetails(404, $exception),
+            $exception instanceof MissingApiKeyException => $this->handleExceptionWithNoDetails(400, $exception),
+            $exception instanceof InvalidApiKeyException => $this->handleExceptionWithNoDetails(401, $exception),
+            $exception instanceof InvalidRequestException => $this->handleInvalidRequestException($exception),
+            $exception instanceof MissingParameterException => $this->handleMissingParameterException($exception),
             default => $this->handleDefaultException($exception)
         };
     }
@@ -39,7 +41,20 @@ class ExceptionsHandler
             'body' => [
                 'error' => true,
                 'message' => 'A critical error has occured.',
-                'details' => $error->getMessage()
+                'details' => $error->getMessage(),
+                'file' => $error->getFile(),
+                'line' => $error->getLine()
+            ]
+        ];
+    }
+
+    private function handleExceptionWithNoDetails(int $code, \Exception $e)
+    {
+        return [
+            'status' => $code,
+            'body' => [
+                'error' => true,
+                'message' => $e->getMessage()
             ]
         ];
     }
@@ -63,7 +78,7 @@ class ExceptionsHandler
             'body' => [
                 'error' => 'Database error',
                 'message' => 'An unexpected database exception occurred.',
-                'message' => $exception->getMessage()
+                'details' => $exception->getMessage()
             ]
         ];
     }
