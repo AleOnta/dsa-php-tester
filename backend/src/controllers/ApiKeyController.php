@@ -2,6 +2,10 @@
 
 namespace Backend\Controllers;
 
+use Backend\Exceptions\InvalidApiKeyException;
+use Backend\Exceptions\MissingApiKeyException;
+use Backend\Models\ApiKey;
+
 class ApiKeyController extends \Backend\Controllers\Controller
 {
 
@@ -28,15 +32,15 @@ class ApiKeyController extends \Backend\Controllers\Controller
         # validate credentials
         if ($hash) {
             if (password_verify($body['password'], $hash)) {
-                $apiKey = $this->apiKeyService->fetchKey($user_id);
+                $apikey = $this->apiKeyService->fetchKey($user_id);
                 $this->response(
-                    200,
+                    201,
                     [
                         'status' => 'Success',
                         'message' => 'Successfully logged in',
-                        'apikey' => $apiKey->getApiKey(),
-                        'expiresIn' => $apiKey->secondsToExipration(),
-                        'expirationTime' => $apiKey->getExpiresAt()
+                        'apikey' => $apikey->getApiKey(),
+                        'expiresIn' => $apikey->secondsToExipration(),
+                        'expirationTime' => $apikey->getExpiresAt()
                     ]
                 );
             } else {
@@ -53,7 +57,32 @@ class ApiKeyController extends \Backend\Controllers\Controller
 
     public function refresh()
     {
-        # extract request body
-
+        # extract the apikey from the headers
+        $apikey = $this->request->getApiKey();
+        # check if apikey is set
+        if (empty($apikey)) {
+            throw new MissingApiKeyException();
+        }
+        # check if the api key exists and is associated with a user
+        $apikeyId = $this->apiKeyService->keyExists($apikey);
+        if (!$apikeyId) {
+            throw new InvalidApiKeyException(substr($apikey, -6));
+        }
+        # generate a new apikey
+        $newApiKey = \Backend\Models\ApiKey::generateApiKey();
+        # update the current entity
+        $this->apiKeyService->updateApiKey($apikeyId['id'], $newApiKey);
+        # retrieve the updated key
+        $apikey = (new ApiKey())->hydrate($this->apiKeyService->fetchKeyById($apikeyId['id']));
+        # return new apikey to the client
+        $this->response(
+            200,
+            [
+                'status' => 'Success',
+                'apikey' => $apikey->getApiKey(),
+                'expiresIn' => $apikey->secondsToExipration(),
+                'expirationTime' => $apikey->getExpiresAt()
+            ]
+        );
     }
 }
