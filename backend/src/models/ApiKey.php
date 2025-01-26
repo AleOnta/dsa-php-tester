@@ -48,7 +48,7 @@ class ApiKey
         return strtotime($this->expires_at) - strtotime('now');
     }
 
-    public function generateApiKey($length = 32)
+    public static function generateApiKey($length = 32)
     {
         return $apikey = bin2hex(random_bytes($length));
     }
