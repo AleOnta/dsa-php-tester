@@ -3,6 +3,7 @@
 namespace Backend\Services;
 
 use Backend\Exceptions\NotFoundException;
+use Backend\Models\ApiKey;
 use Exception;
 
 class ApiKeyService
@@ -38,7 +39,7 @@ class ApiKeyService
 
     public function fetchKeyById(int $id)
     {
-        return $this->apiKeyRepo->findById($id);
+        return $apikey = (new ApiKey())->hydrate($this->apiKeyRepo->findById($id));
     }
 
     public function updateApiKey(int $id, string $apikey)

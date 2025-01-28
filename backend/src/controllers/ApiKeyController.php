@@ -73,7 +73,7 @@ class ApiKeyController extends \Backend\Controllers\Controller
         # update the current entity
         $this->apiKeyService->updateApiKey($apikeyId['id'], $newApiKey);
         # retrieve the updated key
-        $apikey = (new ApiKey())->hydrate($this->apiKeyService->fetchKeyById($apikeyId['id']));
+        $apikey = $this->apiKeyService->fetchKeyById($apikeyId['id']);
         # return new apikey to the client
         $this->response(
             200,
