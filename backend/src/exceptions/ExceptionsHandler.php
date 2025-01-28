@@ -27,6 +27,7 @@ class ExceptionsHandler
             $exception instanceof ValidationException => $this->handleValidationException($exception),
             $exception instanceof NotFoundException => $this->handleExceptionWithNoDetails(404, $exception),
             $exception instanceof MissingApiKeyException => $this->handleExceptionWithNoDetails(400, $exception),
+            $exception instanceof ExpiredApiKeyException => $this->handleExceptionWithNoDetails(401, $exception),
             $exception instanceof InvalidApiKeyException => $this->handleExceptionWithNoDetails(401, $exception),
             $exception instanceof InvalidRequestException => $this->handleInvalidRequestException($exception),
             $exception instanceof MissingParameterException => $this->handleMissingParameterException($exception),
