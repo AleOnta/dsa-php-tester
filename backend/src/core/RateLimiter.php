@@ -57,7 +57,7 @@ class RateLimiter
             return true;
         }
         # store the request log
-        #$this->storeRequestLog($apikey, $endpoint);
+        $this->storeRequestLog($apikey, $endpoint);
         # allow the request
         return false;
     }
