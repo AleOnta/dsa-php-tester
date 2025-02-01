@@ -8,6 +8,7 @@ use Backend\Controllers\UserController;
 use Backend\Middlewares\AuthMiddleware;
 use Backend\Middlewares\RateLimitMiddleware;
 use Backend\Services\ApiKeyService;
+use Backend\Utils\AppConstants;
 
 $router = new Router($container);
 
@@ -25,11 +26,23 @@ $router->group('/api/v1', function ($router, $container) {
         '/auth/refresh-apikey',
         ApiKeyController::class,
         'refresh',
-        [[RateLimitMiddleware::class, ['db' => $container->get('db'), 'endpoint' => '/api/v1/auth/refresh-apikey', 'limit' => 3, 'window' => 900]]]
+        [
+            [
+                RateLimitMiddleware::class,
+                [
+                    'db' => $container->get('db'),
+                    'endpoint' => '/api/v1/auth/refresh-apikey',
+                    'limit' => 3,
+                    'window' => 900
+                ]
+            ]
+        ]
     );
 
+
+
     # DATASETS ENDPOINTS
-    $router->get('/datasets/upload', DatasetsController::class, 'index', [[AuthMiddleware::class, [$container->get(ApiKeyService::class)]]]);
+    include(AppConstants::ROUTES_DIR . "datasets.php");
 });
 
 $router->dispatch();
