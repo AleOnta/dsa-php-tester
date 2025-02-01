@@ -26,6 +26,7 @@ class ExceptionsHandler
             $exception instanceof \PDOException => $this->handleDatabaseException($exception),
             $exception instanceof ValidationException => $this->handleValidationException($exception),
             $exception instanceof NotFoundException => $this->handleExceptionWithNoDetails(404, $exception),
+            $exception instanceof FileUploadException => $this->handleValidationWithDetails(400, $exception),
             $exception instanceof MissingApiKeyException => $this->handleExceptionWithNoDetails(400, $exception),
             $exception instanceof ExpiredApiKeyException => $this->handleExceptionWithNoDetails(401, $exception),
             $exception instanceof InvalidApiKeyException => $this->handleExceptionWithNoDetails(401, $exception),
@@ -56,6 +57,23 @@ class ExceptionsHandler
             'body' => [
                 'error' => true,
                 'message' => $e->getMessage()
+            ]
+        ];
+    }
+
+    private function handleValidationWithDetails(int $code, \Exception $exception)
+    {
+        $details = [];
+        if (method_exists($exception, 'getErrors')) {
+            $details = $exception->getErrors();
+        }
+
+        return [
+            'status' => 422,
+            'body' => [
+                'error' => true,
+                'message' => $exception->getMessage(),
+                'details' => $details
             ]
         ];
     }
