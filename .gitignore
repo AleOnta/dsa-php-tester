@@ -29,6 +29,7 @@ backend/composer.lock
 backend/src/devtester.php
 backend/src/createmigration.php
 backend/public/datasets-upload.php
+backend/src/uploads/
 
 # frontend path
 frontend/.env

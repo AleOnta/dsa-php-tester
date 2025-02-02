@@ -19,16 +19,17 @@ class DatasetsService
     # check if any error has occurred during file upload
     private function checkUploadError(array $file)
     {
+        # check if an error has occurred
         if ($file['error'] !== UPLOAD_ERR_OK) {
             throw new FileUploadException(
                 'Error during file upload',
-                ['error' => $file['error']]
+                ['error' => $this->getUploadErrorById($file['error'])]
             );
         }
     }
 
-    # validate the uploaded file size (default to 15 MB)
-    private function validateFileSize(array $file, $maxSize = 15 * 1024 * 1024)
+    # validate the uploaded file size (default to 20 MB)
+    private function validateFileSize(array $file, $maxSize = 20 * 1024 * 1024)
     {
         if ($file['size'] > $maxSize) {
             throw new FileUploadException(
@@ -41,13 +42,23 @@ class DatasetsService
     # validate the uploaded file type
     private function validateFileType(array $file)
     {
-        # extract the file type
+        # get the uploaded file extension 
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        # check if the extension is allowed
+        if (!in_array($ext, $this->getAllowedFileExtensions())) {
+            throw new FileUploadException(
+                'Error during file upload',
+                ['file_type' => "Dataset file type ({$ext}) isn't supported. File Types supported: (" . implode(', ', $this->getAllowedFileExtensions()) . ')']
+            );
+        }
+
+        # detect file content type
         $mimeType = mime_content_type($file['tmp_name']);
-        # check if the filetype is supported
+        # check if the content type of the file is supported
         if (!in_array($mimeType, $this->getAllowedFileTypes())) {
             throw new FileUploadException(
                 'Error during file upload',
-                ['file_type' => "Dataset file type ({$mimeType}) isn't supported. File Types supported: " . $this->getAllowedFileTypeLabels()]
+                ['file_type' => "Dataset Content-Type ({$mimeType}) isn't supported. Content-Type supported: (" . implode(', ', $this->getAllowedFileExtensions()) . ')']
             );
         }
     }
@@ -75,15 +86,30 @@ class DatasetsService
         return $this->allowedFileTypes;
     }
 
-    private function getAllowedFileTypeLabels()
+    private function getAllowedFileExtensions()
     {
-        $allowedTypes = "";
+        $allowedTypes = [];
         foreach ($this->getAllowedFileTypes() as $fileType) {
             match ($fileType) {
-                'text/csv' => $allowedTypes .= 'CSV,',
-                'application/json' => $allowedTypes .= 'JSON,'
+                'text/csv' => $allowedTypes[] = 'csv',
+                'application/json' => $allowedTypes[] = 'json'
             };
         }
-        return substr($allowedTypes, 0, strlen($allowedTypes) - 1);
+        return $allowedTypes;
+    }
+
+    private function getUploadErrorById(int $id)
+    {
+        return match ($id) {
+            0 => 'There is no error, the file uploaded with success',
+            1 => 'The uploaded file exceeds the upload_max_filesize directive in php.ini',
+            2 => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form',
+            3 => 'The uploaded file was only partially uploaded',
+            4 => 'No file was uploaded',
+            6 => 'Missing a temporary folder',
+            7 => 'Failed to write file to disk.',
+            8 => 'A PHP extension stopped the file upload.',
+            default => 'Error not recognized'
+        };
     }
 }
