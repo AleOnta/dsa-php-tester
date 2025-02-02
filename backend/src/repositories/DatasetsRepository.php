@@ -8,7 +8,6 @@ class DatasetsRepository extends Repository
 {
     public function __construct(PDO $db)
     {
-        $this->db = $db;
-        $this->table = 'datasets';
+        parent::__construct($db, 'datasets');
     }
 }
