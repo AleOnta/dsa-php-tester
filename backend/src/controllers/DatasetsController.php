@@ -5,17 +5,19 @@ namespace Backend\Controllers;
 use Backend\Exceptions\FileUploadException;
 use Backend\Exceptions\MissingDatasetException;
 use Backend\Services\DatasetsService;
+use Backend\Services\JobService;
 use Backend\Utils\AppConstants;
 
 class DatasetsController extends Controller
 {
-
     private DatasetsService $datasetsService;
+    private JobService $jobService;
 
-    public function __construct(DatasetsService $datasetsService)
+    public function __construct(DatasetsService $datasetsService, JobService $jobService)
     {
         parent::__construct();
         $this->datasetsService = $datasetsService;
+        $this->jobService = $jobService;
     }
 
     public function index()
@@ -45,5 +47,25 @@ class DatasetsController extends Controller
         }
         # change the file permissions
         chmod($path, 644);
+        # create a new file upload job
+        $this->jobService->createFileUploadJob($filename);
+        # spawn an upload job
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            # spawn job on windows environment
+            $cmd = "start /B php " . __DIR__ . "\process_dataset.php " . escapeshellarg($path);
+            pclose(popen($cmd, 'r'));
+        } else {
+            # spawn job on unix / linux environment
+            $cmd = "php " . __DIR__ . "/process_dataset.php " . escapeshellarg($path) . ' > /dev/null 2>&1 &';
+            exec($cmd);
+        }
+        # return response to the client
+        $this->response(
+            201,
+            [
+                'status' => 'ok',
+                'message' => 'file correctly uploaded'
+            ]
+        );
     }
 }
