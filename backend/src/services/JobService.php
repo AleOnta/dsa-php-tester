@@ -23,7 +23,7 @@ class JobService
             [
                 'file' => $file,
                 'status' => 'initialized',
-                'progress' => 1,
+                'progress' => 0,
                 'message' => 'file received by the server',
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
