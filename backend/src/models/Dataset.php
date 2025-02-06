@@ -14,6 +14,20 @@ class Dataset
 
     public function __construct() {}
 
+    public function hydrate(array $data)
+    {
+        if (isset($data['id'])) {
+            $this->id = $data['id'];
+            $this->name = $data['name'];
+            $this->type = $data['type'];
+            $this->size = $data['size'];
+            $this->created_at = $data['created_at'];
+            $this->uploaded = $data['uploaded'];
+            return $this;
+        }
+        return false;
+    }
+
     public function getId()
     {
         return $this->id;
