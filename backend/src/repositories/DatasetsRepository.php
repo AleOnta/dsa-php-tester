@@ -20,7 +20,7 @@ class DatasetsRepository extends Repository
         # execute the query
         $stmt->execute();
         # return the result
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?? false;
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?? false;
     }
 
     public function create(string $name, string $type, int $size)
