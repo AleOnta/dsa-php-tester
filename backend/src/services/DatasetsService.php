@@ -3,6 +3,7 @@
 namespace Backend\Services;
 
 use Backend\Exceptions\FileUploadException;
+use Backend\Models\Dataset;
 use Backend\Repositories\DatasetsRepository;
 
 class DatasetsService
@@ -111,5 +112,11 @@ class DatasetsService
             8 => 'A PHP extension stopped the file upload.',
             default => 'Error not recognized'
         };
+    }
+
+    public function createDatasets(string $name, string $type, int $size)
+    {
+        # create a dataset instance 
+        $dataset = new Dataset();
     }
 }

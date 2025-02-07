@@ -22,16 +22,22 @@ class DatasetImporter
         $this->setDataset($datasetId);
     }
 
+    public function getFilename()
+    {
+        return $this->dataset;
+    }
+
     public function setDataset(int $datasetId)
     {
+        # retrieve dataset by id
         $dataset = $this->datasetsRepository->findDatasetById($datasetId);
         if (!$dataset) {
+            # dataset not found
             throw new RuntimeException("No Dataset found with id {$datasetId}");
         }
-        $dataset = (new Dataset())->hydrate($dataset);
-
-        $data = file_get_contents(AppConstants::UPLOADS_DIR . '/datasets/' . $dataset->getName());
-
-        dd(json_decode($data, 1));
+        # set the dataset attr
+        $this->dataset = (new Dataset())->hydrate($dataset);
+        $this->fileName = $this->dataset->getName();
+        $this->fileType = $this->dataset->getType();
     }
 }
