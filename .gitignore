@@ -28,6 +28,7 @@ backend/composer.json
 backend/composer.lock
 backend/src/devtester.php
 backend/src/createmigration.php
+backend/src/process_dataset.php
 backend/public/datasets-upload.php
 backend/src/uploads/
 
