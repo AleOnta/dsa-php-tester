@@ -8,11 +8,13 @@ class Job
 {
     protected ?int $id;
     protected ?string $file;
+
     protected UploadStatus $status;
     protected int $progress;
     protected ?string $message;
     protected string $created_at;
     protected string $updated_at;
+    protected int $dataset_id;
 
     public function __construct($data = [])
     {
@@ -25,13 +27,14 @@ class Job
 
     public function hydrate(array $data)
     {
-        $this->id = $data['id'];
+        $this->id = $data['id'] ?? null;
         $this->file = $data['file'] ?? null;
         $this->status = UploadStatus::from($data['status']);
         $this->progress = $data['progress'];
         $this->message = $data['message'] ?? null;
         $this->created_at = $data['created_at'];
         $this->updated_at = $data['updated_at'];
+        $this->dataset_id = $data['dataset_id'];
     }
 
     public function getId()
@@ -97,6 +100,16 @@ class Job
         $this->updated_at = $updated_at;
     }
 
+    public function getDatasetId()
+    {
+        return $this->dataset_id;
+    }
+
+    public function setDatasetId(int $id)
+    {
+        $this->dataset_id = $id;
+    }
+
     public function values()
     {
         return [
@@ -105,7 +118,8 @@ class Job
             'progress' => $this->progress,
             'message' => $this->message ?? null,
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+            'updated_at' => $this->updated_at,
+            'dataset_id' => $this->dataset_id
         ];
     }
 }

@@ -14,18 +14,14 @@ class JobRepository extends Repository
 
     public function findByJobId(int $id)
     {
-        $data = $this->findById($id);
-        if ($data) {
-            return new Job($data);
-        }
-        return $data;
+        return $this->findById($id);
     }
 
     public function create(Job $job)
     {
         # define the query
-        $query = "INSERT INTO {$this->table} (file, status, progress, message, created_at, updated_at) ";
-        $query .= "VALUES (:file, :status, :progress, :message, :created_at, :updated_at);";
+        $query = "INSERT INTO {$this->table} (file, status, progress, message, created_at, updated_at, dataset_id) ";
+        $query .= "VALUES (:file, :status, :progress, :message, :created_at, :updated_at, :dataset_id);";
         # prepare the statement
         $stmt = $this->db->prepare($query);
         # execute the query
@@ -39,6 +35,8 @@ class JobRepository extends Repository
 
     public function update(int $id, array $data)
     {
+        # adds the dataset id
+        $data['id'] = $id;
         # adds the updated at value as default
         $data['updated_at'] = date('Y-m-d H:i:s');
         # create to update statement

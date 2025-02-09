@@ -2,6 +2,7 @@
 
 namespace Backend\Services;
 
+use Backend\Exceptions\NotFoundException;
 use Backend\Models\Job;
 use Backend\Models\UploadStatus;
 use Backend\Repositories\JobRepository;
@@ -16,7 +17,19 @@ class JobService
         $this->jobRepository = $jobRepo;
     }
 
-    public function createFileUploadJob(string $file,)
+    public function getJobById(int $jobId)
+    {
+        # extract the job from the database
+        $job = $this->jobRepository->findByJobId($jobId);
+        # check if the job exists
+        if (!$job) {
+            throw new NotFoundException("Job not found");
+        }
+        # return the job instance
+        return new Job($job);
+    }
+
+    public function createFileUploadJob(string $file, int $datasetId)
     {
         # create an instance of the job
         $job = new Job(
@@ -26,7 +39,8 @@ class JobService
                 'progress' => 0,
                 'message' => 'file received by the server',
                 'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
+                'updated_at' => date('Y-m-d H:i:s'),
+                'dataset_id' => $datasetId
             ]
         );
         # store the job in the db

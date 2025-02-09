@@ -2,6 +2,7 @@
 
 namespace Backend\Repositories;
 
+use Backend\Models\Dataset;
 use PDO;
 
 class DatasetsRepository extends Repository
@@ -23,15 +24,28 @@ class DatasetsRepository extends Repository
         return $stmt->fetch(PDO::FETCH_ASSOC) ?? false;
     }
 
-    public function create(string $name, string $type, int $size)
+    public function create(Dataset $dataset)
     {
         # define the query
         $stmt = $this->db->prepare("INSERT INTO {$this->table} (name, type, size) VALUES (?, ?, ?);");
         # execute the query
-        $insert = $stmt->execute([$name, $type, $size]);
+        $insert = $stmt->execute([$dataset->getName(), $dataset->getType(), $dataset->getSize('B')]);
         # check the operation result
         if ($insert) {
             # return dataset id
+            return $this->db->lastInsertId();
+        }
+        return false;
+    }
+
+    public function storeJSON(int $datasetId, string $json)
+    {
+        # define the query
+        $stmt = $this->db->prepare("INSERT INTO json_datasets_content (dataset_id, object) VALUES (?, ?);");
+        # execute the query binding params
+        $insert = $stmt->execute([$datasetId, $json]);
+        # return id or failure
+        if ($insert) {
             return $this->db->lastInsertId();
         }
         return false;

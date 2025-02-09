@@ -3,8 +3,10 @@
 namespace Backend\Services;
 
 use Backend\Exceptions\FileUploadException;
+use Backend\Exceptions\NotFoundException;
 use Backend\Models\Dataset;
 use Backend\Repositories\DatasetsRepository;
+use RuntimeException;
 
 class DatasetsService
 {
@@ -114,9 +116,48 @@ class DatasetsService
         };
     }
 
-    public function createDatasets(string $name, string $type, int $size)
+    public function getFileType(array $file)
+    {
+        return match ($file['type']) {
+            'application/json' => 'JSON',
+            'text/csv' => 'CSV',
+            default => 'NOT RECOGNIZED'
+        };
+    }
+
+    public function getDatasetById(int $datasetId)
+    {
+        $dataset = $this->datasetsRepository->findDatasetById($datasetId);
+        if (!$dataset) {
+            throw new NotFoundException("Dataset not found");
+        }
+        return $dataset;
+    }
+
+    public function createDataset(string $name, string $type, int $size)
     {
         # create a dataset instance 
-        $dataset = new Dataset();
+        $dataset = new Dataset([
+            'name' => $name,
+            'type' => $type,
+            'size' => $size
+        ]);
+        # store the dataset record
+        $datasetId = $this->datasetsRepository->create($dataset);
+        if (!$datasetId) {
+            # error while creating record
+            throw new RuntimeException("Error encountered while adding new dataset to the database");
+        }
+        # return the entity id
+        return $datasetId;
+    }
+
+    public function storeJsonObject(int $datasetId, string $json)
+    {
+        $objectId = $this->datasetsRepository->storeJSON($datasetId, json_encode($json));
+        if (!$objectId) {
+            return false;
+        }
+        return $objectId;
     }
 }
