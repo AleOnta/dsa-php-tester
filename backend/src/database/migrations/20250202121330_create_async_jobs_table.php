@@ -8,8 +8,7 @@ class CreateAsyncJobsTable
         # define create table query
         $query = "CREATE TABLE async_jobs (
             id SERIAL PRIMARY KEY,
-            file TEXT   ,
-            job_type TEXT NOT NULL,
+            file TEXT,
             status TEXT NOT NULL,
             PROGRESS int DEFAULT 0,
             message TEXT,
