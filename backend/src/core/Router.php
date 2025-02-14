@@ -90,7 +90,6 @@ class Router
                 }
             }
         }
-        # handle undefined request
         dd("URI: {$uri} not found...");
     }
 

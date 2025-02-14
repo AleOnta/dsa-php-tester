@@ -16,28 +16,25 @@ $router = new Router($container);
 $router->get('/', RootController::class, 'index', []);
 
 $router->group('/api/v1', function ($router, $container) {
-    # Users
+
     # register as new user    
     $router->post('/users/register', UserController::class, 'register', []);
+
+    # update a user
+    $router->patch('/users/edit/{id}', UserController::class, 'update', [
+        [AuthMiddleware::class, [$container->get(ApiKeyService::class)]],
+        [RateLimitMiddleware::class, rateLimitSetting($container, '/api/v1/users/edit/{id}')],
+    ])->where(['id' => 'int']);
+
     # login and retrieve api key
-    $router->post('/auth/login', ApiKeyController::class, 'authenticate', []);
+    $router->post('/auth/login', ApiKeyController::class, 'authenticate', [
+        [RateLimitMiddleware::class, rateLimitSetting($container, '/api/v1/auth/login')],
+    ]);
+
     # refresh apikey token
-    $router->get(
-        '/auth/refresh-apikey',
-        ApiKeyController::class,
-        'refresh',
-        [
-            [
-                RateLimitMiddleware::class,
-                [
-                    'db' => $container->get('db'),
-                    'endpoint' => '/api/v1/auth/refresh-apikey',
-                    'limit' => 3,
-                    'window' => 900
-                ]
-            ]
-        ]
-    );
+    $router->get('/auth/refresh-apikey', ApiKeyController::class, 'refresh', [
+        [RateLimitMiddleware::class, rateLimitSetting($container, '/api/v1/auth/refresh-apikey', 3, 900)]
+    ]);
 
 
 
