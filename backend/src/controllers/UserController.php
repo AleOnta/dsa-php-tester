@@ -60,4 +60,10 @@ class UserController extends Controller
         # return response
         $this->response(202, ['status' => 'Ok', 'message' => 'User created correctly, authenticate to receive your api key', 'id' => $userId]);
     }
+
+    public function update()
+    {
+        $body = $this->request->body['content'];
+        dd($body);
+    }
 }

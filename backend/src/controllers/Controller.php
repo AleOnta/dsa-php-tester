@@ -13,6 +13,7 @@ class Controller
 
     public function response($code, $responseObj)
     {
+        mime_content_type('application/json');
         http_response_code($code);
         echo json_encode($responseObj);
         die();
