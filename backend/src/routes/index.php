@@ -23,7 +23,7 @@ $router->group('/api/v1', function ($router, $container) {
     # update a user
     $router->patch('/users/edit/{id}', UserController::class, 'update', [
         [AuthMiddleware::class, [$container->get(ApiKeyService::class)]],
-        [RateLimitMiddleware::class, rateLimitSetting($container, '/api/v1/users/edit/{id}')],
+        # [RateLimitMiddleware::class, rateLimitSetting($container, '/api/v1/users/edit/{id}')],
     ])->where(['id' => 'int']);
 
     # login and retrieve api key
