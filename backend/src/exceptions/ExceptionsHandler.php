@@ -24,9 +24,10 @@ class ExceptionsHandler
         return match (true) {
             $exception instanceof \Error => $this->handleErrors($exception),
             $exception instanceof \PDOException => $this->handleDatabaseException($exception),
-            $exception instanceof ValidationException => $this->handleValidationException($exception),
+            $exception instanceof ValidationException => $this->handleExceptionWithDetails(422, $exception),
             $exception instanceof NotFoundException => $this->handleExceptionWithNoDetails(404, $exception),
-            $exception instanceof FileUploadException => $this->handleValidationWithDetails(400, $exception),
+            $exception instanceof FileUploadException => $this->handleExceptionWithDetails(400, $exception),
+            $exception instanceof AuthenticationException => $this->handleExceptionWithDetails(403, $exception),
             $exception instanceof MissingApiKeyException => $this->handleExceptionWithNoDetails(400, $exception),
             $exception instanceof ExpiredApiKeyException => $this->handleExceptionWithNoDetails(401, $exception),
             $exception instanceof InvalidApiKeyException => $this->handleExceptionWithNoDetails(401, $exception),
@@ -61,7 +62,7 @@ class ExceptionsHandler
         ];
     }
 
-    private function handleValidationWithDetails(int $code, \Exception $exception)
+    private function handleExceptionWithDetails(int $code, \Exception $exception)
     {
         $details = [];
         if (method_exists($exception, 'getErrors')) {
@@ -69,7 +70,7 @@ class ExceptionsHandler
         }
 
         return [
-            'status' => 422,
+            'status' => $code,
             'body' => [
                 'error' => true,
                 'message' => $exception->getMessage(),
