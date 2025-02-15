@@ -24,46 +24,72 @@ class UserController extends Controller
         $body = $this->request->body['content'];
         # check for missing parameters in req body
         $missing = $this->checkRequestBodyParameters(['username', 'email', 'password']);
-        # if any required parameter is missing, return errors
-        if (count($missing) > 0) {
-            throw new MissingParameterException('Missing parameters', $missing);
-        }
         # validate the username input
         $username = $this->userService->validateUsername($body['username']);
-        if (is_array($username)) {
-            throw new ValidationException('Username is invalid', ['username' => $username[1]]);
-        }
-        # check if the username has already been registered
-        if ($this->userService->usernameExists($username)) {
-            # return response to the client without sharing the username existence
-            $error = 'Username cannot be processed, try to change its value with an alphanumeric string with a length between 6-16 chars';
-            throw new InvalidRequestException('Bad Request', ['username' => $error]);
-        }
         # validate the email input
         $email = $this->userService->validateEmail($body['email']);
-        if (is_array($email)) {
-            throw new ValidationException('Email is invalid', ['email' => $email[1]]);
-        }
-        # check if the email has already been registered
-        if ($this->userService->usernameExists($username)) {
-            # return response to the client without sharing the username existence
-            $error = 'Email address cannot be processed...';
-            throw new InvalidRequestException('Bad Request', ['email' => $error]);
-        }
         # validate the password input
         $password = $this->userService->validatePassword($body['password']);
-        if (is_array($password)) {
-            throw new ValidationException('Password is invalid', ['password' => $password[1]]);
-        }
         # create the user
         $userId = $this->userService->create($username, $email, $password);
         # return response
-        $this->response(202, ['status' => 'Ok', 'message' => 'User created correctly, authenticate to receive your api key', 'id' => $userId]);
+        $this->response(
+            202,
+            [
+                'status' => 'Ok',
+                'message' => 'User created correctly, authenticate to receive your api key',
+                'id' => $userId
+            ]
+        );
     }
 
-    public function update()
+    public function update(int $id)
     {
+        # retrieve the user by id
+        $userId = $this->userService->validateUserId($id);
+        # extract the request body
         $body = $this->request->body['content'];
-        dd($body);
+        # check for available parameters in the body
+        $this->checkPossibleRequestBodyParameters(['username', 'email', 'new_password']);
+        # check if the user authentication (password) is present
+        if (!isset($body['current_password']) || trim($body['current_password']) === '') {
+            throw new MissingParameterException(
+                'Authentication Error',
+                ['current_password' => 'Your current password is required for this operation.']
+            );
+        }
+        # check if the forwarded password is valid
+        $this->userService->authenticateWithPassword($id, $body['current_password']);
+        $updates = ['query' => [], 'values' => []];
+        # check username value
+        if (isset($body['username'])) {
+            $username = $this->userService->validateUsername($body['username']);
+            $updates['query'][] = 'username = :username';
+            $updates['values'][] = $body['username'];
+        }
+        # check the email value
+        if (isset($body['email'])) {
+            $email = $this->userService->validateEmail($body['email']);
+            $updates['query'][] = 'email = :email';
+            $updates['values'][] = $body['email'];
+        }
+        # check the password field
+        if (isset($body['new_password'])) {
+            $new_password = $this->userService->validatePassword($body['new_password']);
+            $updates['query'][] = 'password = :password';
+            $updates['values'][] = password_hash($body['new_password'], PASSWORD_BCRYPT);
+        }
+        # append the user id to the values
+        $updates['values'][] = $id;
+        # update the user data
+        $this->userService->update($updates);
+        # return response to the client
+        $this->response(
+            200,
+            [
+                'status' => 'Ok',
+                'message' => 'User updated successfully',
+            ]
+        );
     }
 }
