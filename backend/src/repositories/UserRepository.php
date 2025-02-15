@@ -73,6 +73,14 @@ class UserRepository extends Repository
         }
     }
 
+    public function updateUser(string $query, array $values)
+    {
+        # prepare the query
+        $stmt = $this->db->prepare("UPDATE {$this->table} SET {$query} WHERE id = :id;");
+        # execute the query
+        return $stmt->execute($values);
+    }
+
     public function getUserPassword(int $user_id)
     {
         # prepare the query
