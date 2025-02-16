@@ -14,6 +14,12 @@ class RateLimiter
         $this->db = $db;
     }
 
+    public function getRequestIP()
+    {
+        echo $_SERVER['REMOTE_ADDR'];
+        die();
+    }
+
     public function getApiKeyRequests(string $apikey)
     {
         # prepare the query
@@ -24,28 +30,36 @@ class RateLimiter
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?? [];
     }
 
-    public function storeRequestLog(string $apikey, string $endpoint)
+    public function storeRequestLog(string $type, string $identifier, string $endpoint)
     {
+        # define the column to fill based on type
+        $col = $type === 'ADDR' ? 'remote_address' : 'api_key';
         # prepare the query
-        $stmt = $this->db->prepare("INSERT INTO request_logs (api_key, endpoint) VALUES (:api_key, :endpoint);");
+        $stmt = $this->db->prepare("INSERT INTO request_logs ({$col}, endpoint) VALUES (:{$col}, :endpoint);");
         # bind query parameters
-        $stmt->bindParam('api_key', $apikey, PDO::PARAM_STR);
+        $stmt->bindParam($col, $identifier, PDO::PARAM_STR);
         $stmt->bindParam('endpoint', $endpoint, PDO::PARAM_STR);
         # store in db
         return $stmt->execute();
     }
 
-    public function checkRateLimit(string $apikey, string $endpoint, int $limit, int $window)
+    public function checkRateLimit(string $type, string $identifier, string $endpoint, int $limit, int $window)
     {
         # get current time
         $now = new DateTime();
         # get the start time since to look for requests
         $start = (clone $now)->modify("-{$window} seconds");
-        # extract apikey request in timeframe
-        $stmt = $this->db->prepare("SELECT COUNT(*) as request_made FROM request_logs WHERE api_key = :api_key AND endpoint = :endpoint AND request_time >= :start");
+        # define type of rate limit by type
+        $filter = $type === 'ADDR' ? 'remote_address = :remote_address' : 'api_key = :api_key';
+        # compose the query
+        $query = "SELECT COUNT(*) as request_made FROM request_logs WHERE {$filter} AND endpoint = :endpoint AND request_time >= :start";
+        # extract the requests in timeframe
+        $stmt = $this->db->prepare($query);
+        # define column based on type
+        $key = $type === 'ADDR' ? 'remote_address' : 'api_key';
         # execute the query
         $stmt->execute([
-            'api_key' => $apikey,
+            $key => $identifier,
             'endpoint' => $endpoint,
             'start' => $start->format('Y-m-d H:i:s')
         ]);
@@ -57,7 +71,7 @@ class RateLimiter
             return true;
         }
         # store the request log
-        $this->storeRequestLog($apikey, $endpoint);
+        $this->storeRequestLog($type, $identifier, $endpoint);
         # allow the request
         return false;
     }
