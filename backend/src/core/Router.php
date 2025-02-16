@@ -90,6 +90,10 @@ class Router
                 }
             }
         }
+
+        header("Content-Type: application/json");
+        echo json_encode($this->routes);
+        die();
         dd("URI: {$uri} not found...");
     }
 
