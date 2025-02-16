@@ -131,6 +131,15 @@ class UserService
         return $this->userRepo->getUserPassword($user_id);
     }
 
+    public function getUserIdByUsername(string $username)
+    {
+        $user_id = $this->userRepo->existsByUsername($username);
+        if (!$user_id) {
+            throw new NotFoundException("username '{$username}' is invalid.");
+        }
+        return $user_id;
+    }
+
     public function create(string $username, string $email, string $password): int
     {
         # hash the password

@@ -26,7 +26,7 @@ class ApiKeyController extends \Backend\Controllers\Controller
         # check if user has included all required params
         $this->checkRequestBodyParameters(['username', 'password']);
         # check if the username exists
-        $user_id = $this->userService->usernameExists($body['username']);
+        $user_id = $this->userService->getUserIdByUsername($body['username']);
         # retrieve user hashed password
         $hash = $this->userService->getHashedPassword($user_id);
         # validate credentials

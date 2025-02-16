@@ -3,6 +3,7 @@
 use Backend\Services\ApiKeyService;
 use Backend\Middlewares\AuthMiddleware;
 use Backend\Controllers\DatasetsController;
+use Backend\Middlewares\RateLimitApiKeyMiddleware;
 use Backend\Middlewares\RateLimitMiddleware;
 
 $router->post(
@@ -14,7 +15,7 @@ $router->post(
         [AuthMiddleware::class, [$container->get(ApiKeyService::class)]],
         # rate limit middleware
         [
-            RateLimitMiddleware::class,
+            RateLimitApiKeyMiddleware::class,
             [
                 'db' => $container->get('db'),
                 'endpoint' => '/api/v1/datasets/upload',
