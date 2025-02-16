@@ -63,9 +63,17 @@ class Request
         return $this->headers[$key] ?? null;
     }
 
+    public function getRemoteAddress()
+    {
+        return $_SERVER['REMOTE_ADDR'];
+    }
+
     public function getApiKey()
     {
-        $apikey = $this->getHeader('Authorization');
-        return str_replace('Bearer ', '', $apikey);
+        return str_replace(
+            'Bearer ',
+            '',
+            $this->getHeader('Authorization')
+        );
     }
 }
