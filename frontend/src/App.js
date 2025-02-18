@@ -1,10 +1,19 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route } from "react-router";
+import Header from './components/partials/header'
+import Home from './routes/home';
+import Login from "./routes/login"; 
+
 
 const App = () => {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Hello, World!</h1>
-    </div>
+    <BrowserRouter>
+      <Header/>
+      <Routes>
+        <Route path='/' element={<Home/>} />
+        <Route path='/login' element={<Login/>} />
+      </Routes>
+    </BrowserRouter>    
   );
 };
 
