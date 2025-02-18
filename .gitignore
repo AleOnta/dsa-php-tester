@@ -35,4 +35,6 @@ backend/src/uploads/
 # frontend path
 frontend/.env
 frontend/node_modules
+frontend/.parcel-cache/
+frontend/dist/
 
